@@ -61,7 +61,7 @@ kubectl -n app-cluster apply -f resanet-tp-00-deployment.yaml
 kubectl -n app-cluster expose deployment resanet-tp-00 --type=NodePort
 minikube service -n app-cluster resanet-tp-00 --url
 ```
-# Ajouter "/swagger-ui.html" à la fin de l'url retournée
+Note: Ajouter "/swagger-ui.html" à la fin de l'url retournée
 
 ### Déploiement ELK
 ```
@@ -181,7 +181,7 @@ $ docker push clevandowski/filebeat
 ## Annexe
 
 ### Commandes pour tester mysql
- 
+
 kubectl -n app-cluster run -it --rm mysql sh -c 'exec mysql -h"mysql" -P"3306" -uroot -p"coincoin"'
 
 kubectl -n app-cluster run myadmin --link mysql_db_server:db --port 8080 phpmyadmin/phpmyadmin
