@@ -1,0 +1,51 @@
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: elasticsearch-pv-claim
+  labels:
+    app: elk
+spec:
+  accessModes:
+    - ReadWriteOnce
+  resources:
+    requests:
+      storage: 4Gi
+---
+# docker run -d -e ES_JAVA_OPTS='-Xms2g -Xmx2g' -p 5601:5601 -p 9200:9200 -p 5044:5044 -v /home/cyrille/Documents/elk-data:/var/lib/elasticsearch -it --name elk sebp/elk
+
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: elk
+  labels:
+    app: elk
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: elk
+        tier: elk
+    spec:
+      containers:
+      - image: sebp/elk
+        name: elk
+        env:
+        - name: ES_JAVA_OPTS
+          value: '-Xms2g -Xmx2g'
+        ports:
+        - containerPort: 9200
+          name: elasticsearch
+        - containerPort: 5044
+          name: logstash
+        - containerPort: 5601
+          name: kibana
+        volumeMounts:
+        - name: elasticsearch-persistent-storage
+          mountPath: /var/lib/elasticsearch
+      volumes:
+      - name: elasticsearch-persistent-storage
+        persistentVolumeClaim:
+          claimName: elasticsearch-pv-claim

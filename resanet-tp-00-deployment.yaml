@@ -1,0 +1,21 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: resanet-tp-00
+  labels:
+    app: resanet-tp-00
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: resanet-tp-00
+        tier: mysql
+    spec:
+      containers:
+      - image: clevandowski/resanet-tp-00
+        name: resanet-tp-00
+        ports:
+        - containerPort: 8000
+          name: resanet-tp-00

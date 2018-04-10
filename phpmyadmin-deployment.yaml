@@ -1,0 +1,89 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  # labels for the service
+  labels:
+    app: phpmyadmin
+  # name of the service
+  name: phpmyadmin
+spec:
+  type: NodePort
+  ports:
+    # the port that this service should serve on
+    - port: 80
+      # set the target of the port, in this case 81 -> 80
+      targetPort: 80
+      #nodePort: 30568
+  # label keys and values that must match in order to receive traffic for this service
+  selector:
+    # select pods with the name "phpmyadmin"
+    name: phpmyadmin
+---
+# # Kubernetes API version
+# apiVersion: v1
+# # Type of "request"
+# kind: Pod
+# # Metadata of the "object"
+# metadata:
+#   # Name of the "object"
+#   name: phpmyadmin
+#   # Labels of the "object"
+#   labels:
+#     # A lable named "name" with value "phpmyadmin"
+#     app: phpmyadmin
+# # spec ~= Specificationsof the "object"
+# spec:
+#   # List of Container definitions
+#   containers:
+#     # The "name"/"suffix" of the container name
+#     - name: phpmyadmin
+#       # What Docker image to use
+#       image: phpmyadmin/phpmyadmin
+#       env:
+#         - name: PMA_HOST
+#           value: mysql
+#       # List of container ports reachable from within the cluster
+#       ports:
+#         - containerPort: 80
+#           name: phpmyadmin
+---
+# apiVersion: extensions/v1beta1
+# kind: Ingress
+# metadata:
+#   name: phpmyadmin-ingress
+#   annotations:
+#     nginx.ingress.kubernetes.io/rewrite-target: /
+# spec:
+#   rules:
+#   - http:
+#       paths:
+#       - path: /phpmyadmin
+#         backend:
+#           serviceName: phpmyadmin
+#           servicePort: 80
+---
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: phpmyadmin
+  labels:
+    app: phpmyadmin
+spec:
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: phpmyadmin
+        tier: mysql
+    spec:
+      containers:
+      - image: phpmyadmin/phpmyadmin
+        name: phpmyadmin
+        env:
+        - name: PMA_HOST
+          value: mysql
+        ports:
+        - containerPort: 80
+          name: phpmyadmin
