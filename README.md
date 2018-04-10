@@ -1,39 +1,84 @@
-Conf MySQL Kubernetes
+# Kubernetes Sample App Cluster
+Spécial minikube
 
+## Conf démarrage minikube
 
-sysctl -w vm.max_map_count=262144
+### Version VirtualBox
+```
+$ vboxheadless --version
+Oracle VM VirtualBox Headless Interface 5.1.34
+(C) 2008-2018 Oracle Corporation
+All rights reserved.
 
+5.1.34r121010
+```
 
-cd ~/Documents/kubernetes/app-cluster
+### Version Minikube
+```
+$ minikube version
+minikube version: v0.25.2
+```
+
+### Démarrage Minikube
+```
+$ minikube start --vm-driver=virtualbox --cpus 4 --memory 8192
+```
+
+### Prérequis ElasticSearch
+
+```
+$ minikube ssh
+$ sysctl -w vm.max_map_count=262144
+```
+
+## Cluster App
+
+### Déploiement mysql
+
+```
+echo -n coincoin > password.txt
 kubectl -n app-cluster create secret generic mysql-pass --from-file=password.txt
 kubectl -n app-cluster apply -f mysql-deployment.yaml
-# Si besoin de debugger
+```
+
+Si besoin d'exposer mysql (debug)
+```
 kubectl -n app-cluster expose deployment mysql --type=NodePort
 minikube service -n app-cluster mysql --url
+```
 
+### Déploiement phpmyadmin
+```
 kubectl -n app-cluster apply -f phpmyadmin-deployment.yaml
 kubectl -n app-cluster expose deployment phpmyadmin --type=NodePort
 minikube service -n app-cluster phpmyadmin --url
+```
 
-
+### Déploiement microservice "resanet-tp-00"
+TODO: Expliquer le build + push registry
+```
 kubectl -n app-cluster apply -f resanet-tp-00-deployment.yaml
 kubectl -n app-cluster expose deployment resanet-tp-00 --type=NodePort
 minikube service -n app-cluster resanet-tp-00 --url
-# Ajouter "/swagger-ui.html" à la fin de l'url
+```
+# Ajouter "/swagger-ui.html" à la fin de l'url retournée
 
-
-
+### Déploiement ELK
+```
 kubectl -n app-cluster apply -f elk-deployment.yaml
 kubectl -n app-cluster expose deployment elk --type=NodePort
 minikube service -n app-cluster elk --url
+```
 
+### Déploiement filebeat
+```
 kubectl -n app-cluster apply -f filebeat-deployment.yaml
+```
 
 
+## Pb: Erreur entre filebeat et logstash
 
-# Pb: Erreur entre filebeat et logstash
-
-## Log ELK:
+### Log ELK:
 ```
 [2018-04-10T20:46:02,535][WARN ][io.netty.channel.DefaultChannelPipeline] An exceptionCaught() event was fired, and it reached at the tail of the pipeline. It usually means the last handler in the pipeline did not handle the exception.
 io.netty.handler.codec.DecoderException: javax.net.ssl.SSLHandshakeException: error:100000f7:SSL routines:OPENSSL_internal:WRONG_VERSION_NUMBER
@@ -68,13 +113,11 @@ Caused by: javax.net.ssl.SSLHandshakeException: error:100000f7:SSL routines:OPEN
   ... 16 more
 ```
 
-## Solution
+### Solution
 
+cf https://github.com/logstash-plugins/logstash-input-beats/issues/293
 
-
-Help:
-https://github.com/logstash-plugins/logstash-input-beats/issues/293
-Il faut trouver le crt de logstash, le pousser sur filebeat et le prendre en compte dans la conf
+Principe: Il faut trouver le crt de logstash, le pousser sur filebeat et le prendre en compte dans la conf
 
 ==> Emplacement du crt de logstash: se connecter sur le service elk
 ```
@@ -119,20 +162,26 @@ root@filebeat-54kfd:/# echo $LOGSTASH_HOSTS
 elk:5044
 ```
 
-$ cd filebeat
-$ cat Dockerfile 
+```
+$ cat filebeat/Dockerfile 
 FROM komljen/filebeat
 
 ADD filebeat.yml /etc/filebeat/filebeat.yml
 ADD logstash-beats.crt /etc/filebeat/logstash-beats.crt
+```
 
+Build/push image
+```
 $ docker build -t clevandowski/filebeat .
 
 $ docker push clevandowski/filebeat
+```
 
 
+## Annexe
 
-
+### Commandes pour tester mysql
+ 
 kubectl -n app-cluster run -it --rm mysql sh -c 'exec mysql -h"mysql" -P"3306" -uroot -p"coincoin"'
 
 kubectl -n app-cluster run myadmin --link mysql_db_server:db --port 8080 phpmyadmin/phpmyadmin
@@ -150,11 +199,14 @@ http://192.168.99.100:32735/
 
 
 
-# Conf ELK
-
+### Conf ELK
+```
+sudo sysctl vm.max_map_count
 sudo sysctl -w vm.max_map_count=262144
+```
 
-# Editer /etc/sysctl.d/vm_max_map_count.conf de la façon suivante
+### Editer /etc/sysctl.d/vm_max_map_count.conf de la façon suivante
+```
 $ cat /etc/sysctl.d/vm_max_map_count.conf
 vm.max_map_count=262144
-
+```
