@@ -28,7 +28,7 @@ $ minikube start --vm-driver=virtualbox --cpus 4 --memory 8192
 
 ```
 $ minikube ssh
-$ sysctl -w vm.max_map_count=262144
+$ sudo sysctl -w vm.max_map_count=262144
 ```
 
 ## Cluster App
@@ -177,6 +177,12 @@ $ docker build -t clevandowski/filebeat .
 $ docker push clevandowski/filebeat
 ```
 
+# Monitoring
+```
+git clone https://github.com/kubernetes/heapster
+```
+Installer heapster en suivant la doc avec InfluxDB
+cf https://github.com/kubernetes/heapster/blob/master/docs/influxdb.md
 
 ## Annexe
 

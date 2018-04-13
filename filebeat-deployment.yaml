@@ -23,7 +23,7 @@ spec:
             - name: LOGSTASH_HOSTS
               value: elk:5044
             - name: LOG_LEVEL
-              value: debug
+              value: warning
             - name: INDEX_PREFIX
               value: "filebeat"
           volumeMounts:
@@ -46,4 +46,3 @@ spec:
         - name: varlibdockercontainers
           hostPath:
             path: /var/lib/docker/containers
-
