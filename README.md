@@ -33,6 +33,12 @@ $ sudo sysctl -w vm.max_map_count=262144
 
 ## Cluster App
 
+### Création namespace app-cluster
+
+```
+kubectl create namespace app-cluster
+```
+
 ### Déploiement mysql
 
 ```
