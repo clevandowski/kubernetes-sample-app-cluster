@@ -20,3 +20,28 @@ output.logstash:
     certificate_authorities: ["/etc/filebeat/logstash-beats.crt"]
 setup.kibana:
     host: "${LOGSTASH_HOSTS}"
+
+# metricbeat.modules:
+# - module: jolokia
+#   metricsets: ["jmx"]
+#   enabled: true
+#   period: 10s
+#   namespace: "jolokia_metrics"
+#   hosts: ["resanet-tp-00:8000"]
+#   jmx.mappings:
+#     - mbean: 'java.lang:type=Runtime'
+#       attributes:
+#         - attr: Uptime
+#           field: uptime
+#     - mbean: 'java.lang:type=GarbageCollector,name=ConcurrentMarkSweep'
+#       attributes:
+#         - attr: CollectionTime
+#           field: gc.cms_collection_time
+#         - attr: CollectionCount
+#           field: gc.cms_collection_count
+#     - mbean: 'java.lang:type=Memory'
+#       attributes:
+#         - attr: HeapMemoryUsage
+#           field: memory.heap_usage
+#         - attr: NonHeapMemoryUsage
+#           field: memory.non_heap_usage

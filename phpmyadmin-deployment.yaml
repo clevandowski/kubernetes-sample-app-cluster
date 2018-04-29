@@ -1,24 +1,24 @@
 ---
-apiVersion: v1
-kind: Service
-metadata:
-  # labels for the service
-  labels:
-    app: phpmyadmin
-  # name of the service
-  name: phpmyadmin
-spec:
-  type: NodePort
-  ports:
-    # the port that this service should serve on
-    - port: 80
-      # set the target of the port, in this case 81 -> 80
-      targetPort: 80
-      #nodePort: 30568
-  # label keys and values that must match in order to receive traffic for this service
-  selector:
-    # select pods with the name "phpmyadmin"
-    name: phpmyadmin
+# apiVersion: v1
+# kind: Service
+# metadata:
+#   # labels for the service
+#   labels:
+#     app: phpmyadmin
+#   # name of the service
+#   name: phpmyadmin
+# spec:
+#   type: NodePort
+#   ports:
+#     # the port that this service should serve on
+#     - port: 80
+#       # set the target of the port, in this case 81 -> 80
+#       targetPort: 80
+#       #nodePort: 30568
+#   # label keys and values that must match in order to receive traffic for this service
+#   selector:
+#     # select pods with the name "phpmyadmin"
+#     name: phpmyadmin
 ---
 # # Kubernetes API version
 # apiVersion: v1

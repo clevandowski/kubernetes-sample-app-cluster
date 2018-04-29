@@ -1,6 +1,12 @@
 # Kubernetes Sample App Cluster
 Spécial minikube
 
+## Installation minikube+kubectl
+
+```
+https://kubernetes.io/docs/tasks/tools/install-minikube/
+```
+
 ## Conf démarrage minikube
 
 ### Version VirtualBox
@@ -13,10 +19,17 @@ All rights reserved.
 5.1.34r121010
 ```
 
+### Version kubectl
+```
+kubectl version
+Client Version: version.Info{Major:"1", Minor:"10", GitVersion:"v1.10.1", GitCommit:"d4ab47518836c750f9949b9e0d387f20fb92260b", GitTreeState:"clean", BuildDate:"2018-04-12T14:26:04Z", GoVersion:"go1.9.3", Compiler:"gc", Platform:"linux/amd64"}
+Server Version: version.Info{Major:"1", Minor:"10", GitVersion:"v1.10.0", GitCommit:"fc32d2f3698e36b93322a3465f63a14e9f0eaead", GitTreeState:"clean", BuildDate:"2018-03-26T16:44:10Z", GoVersion:"go1.9.3", Compiler:"gc", Platform:"linux/amd64"}
+```
+
 ### Version Minikube
 ```
 $ minikube version
-minikube version: v0.25.2
+minikube version: v0.26.0
 ```
 
 ### Démarrage Minikube
@@ -24,20 +37,58 @@ minikube version: v0.25.2
 $ minikube start --vm-driver=virtualbox --cpus 4 --memory 8192
 ```
 
-### Prérequis ElasticSearch
-
-```
-$ minikube ssh
-$ sudo sysctl -w vm.max_map_count=262144
-```
-
-## Cluster App
-
 ### Création namespace app-cluster
 
 ```
 kubectl create namespace app-cluster
 ```
+
+### Monitoring - Déploiement Heapster
+
+```
+minikube addons enable heapster
+```
+
+OU
+```
+git clone https://github.com/kubernetes/heapster
+```
+Installer heapster en suivant la doc avec InfluxDB
+cf https://github.com/kubernetes/heapster/blob/master/docs/influxdb.md
+
+### Logging - Déploiement ELK
+
+- Prérequis: le namespace app-cluster doit être créé
+- Prérequis ElasticSearch (dans la VM de minikube)
+```
+$ minikube ssh
+$ sudo sysctl -w vm.max_map_count=262144
+$ exit
+```
+
+Lister les pod:namespace:container (pour vérifier les logs)
+```
+$ minikube ssh
+$ cd /var/log/containers
+$ ls | sed -e "s|^\([^_]\+-[a-z0-9]\{5\}\)_\([^_]\+\)_\([^_]\+\)-[0-9a-f]\{64\}\.log$|\1:\2:\3|"
+```
+
+Démarrage d'elk
+```
+kubectl -n app-cluster apply -f elk-deployment.yaml
+kubectl -n app-cluster expose deployment elk --type=NodePort
+minikube service -n app-cluster elk --url
+```
+Prendre l'url relative au port 5601 de Kibana pour l'ouvrir dans l'explorateur
+
+### Déploiement filebeat
+```
+kubectl -n app-cluster apply -f filebeat-deployment.yaml
+```
+
+
+## Cluster App
+
 
 ### Déploiement mysql
 
@@ -49,6 +100,7 @@ kubectl -n app-cluster apply -f mysql-deployment.yaml
 
 Si besoin d'exposer mysql (debug)
 ```
+kubectl -n app-cluster delete service mysql
 kubectl -n app-cluster expose deployment mysql --type=NodePort
 minikube service -n app-cluster mysql --url
 ```
@@ -68,18 +120,6 @@ kubectl -n app-cluster expose deployment resanet-tp-00 --type=NodePort
 minikube service -n app-cluster resanet-tp-00 --url
 ```
 Note: Ajouter "/swagger-ui.html" à la fin de l'url retournée
-
-### Déploiement ELK
-```
-kubectl -n app-cluster apply -f elk-deployment.yaml
-kubectl -n app-cluster expose deployment elk --type=NodePort
-minikube service -n app-cluster elk --url
-```
-
-### Déploiement filebeat
-```
-kubectl -n app-cluster apply -f filebeat-deployment.yaml
-```
 
 
 ## Pb: Erreur entre filebeat et logstash
@@ -183,12 +223,6 @@ $ docker build -t clevandowski/filebeat .
 $ docker push clevandowski/filebeat
 ```
 
-# Monitoring
-```
-git clone https://github.com/kubernetes/heapster
-```
-Installer heapster en suivant la doc avec InfluxDB
-cf https://github.com/kubernetes/heapster/blob/master/docs/influxdb.md
 
 ## Annexe
 
@@ -221,4 +255,15 @@ sudo sysctl -w vm.max_map_count=262144
 ```
 $ cat /etc/sysctl.d/vm_max_map_count.conf
 vm.max_map_count=262144
+```
+
+
+
+### Métriques Mémoire de référence pour resanet-tp-00
+```
+cyrille@cyrille-XPS-15-9560:~$ kubectl -n app-cluster exec -ti resanet-tp-00-5d545f47b9-pcdqs -- ps -ef | grep "java -Xms" | grep -v grep | awk '{print $1}'
+6
+cyrille@cyrille-XPS-15-9560:~$ kubectl -n app-cluster exec -ti resanet-tp-00-5d545f47b9-pcdqs -- jstat -gc 6
+ S0C    S1C    S0U    S1U      EC       EU        OC         OU       MC     MU    CCSC   CCSU   YGC     YGCT    FGC    FGCT     GCT   
+5120.0 4608.0 1799.7  0.0   33792.0   3568.2   86016.0    31063.3   60120.0 58975.3 7424.0 7258.9     92    1.721   3      1.479    3.200
 ```

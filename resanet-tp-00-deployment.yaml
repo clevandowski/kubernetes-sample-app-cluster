@@ -4,6 +4,7 @@ metadata:
   name: resanet-tp-00
   labels:
     app: resanet-tp-00
+    date: 2018-04-29_22-05
 spec:
   strategy:
     type: Recreate
@@ -15,7 +16,140 @@ spec:
     spec:
       containers:
       - image: clevandowski/resanet-tp-00
+        imagePullPolicy: Always
         name: resanet-tp-00
         ports:
         - containerPort: 8000
           name: resanet-tp-00
+        # Kill message dans minikube, 
+        # $ sudo journalctl -xef 
+        # Apr 20 16:45:31 minikube kernel: java invoked oom-killer: gfp_mask=0x24000c0(GFP_KERNEL), nodemask=0, order=0, oom_score_adj=984
+        # Apr 20 16:45:31 minikube kernel: java cpuset=8d89ea00437d020be5bcfca6500f76da8c54a862517cee4aae75e5d13c95448a mems_allowed=0
+        # Apr 20 16:45:31 minikube kernel: CPU: 0 PID: 16775 Comm: java Tainted: G        W  O    4.9.64 #1
+        # Apr 20 16:45:31 minikube kernel: Hardware name: innotek GmbH VirtualBox/VirtualBox, BIOS VirtualBox 12/01/2006
+        # Apr 20 16:45:31 minikube kernel:  ffffc9000b1dfc70 ffffffff813da272 ffffc9000b1dfd88 ffff880117878000
+        # Apr 20 16:45:31 minikube kernel:  ffffc9000b1dfce8 ffffffff811a4fe1 0000000000000000 00000000000003d8
+        # Apr 20 16:45:31 minikube kernel:  ffffc9000b1dfd88 ffff88006c4e1c00 0000000000000001 ffffc9000b1dfcb8
+        # Apr 20 16:45:31 minikube kernel: Call Trace:
+        # Apr 20 16:45:31 minikube kernel:  [<ffffffff813da272>] dump_stack+0x63/0x81
+        # Apr 20 16:45:31 minikube kernel:  [<ffffffff811a4fe1>] dump_header+0x76/0x1f8
+        # Apr 20 16:45:31 minikube kernel:  [<ffffffff81142f86>] oom_kill_process+0x206/0x3d0
+        # Apr 20 16:45:31 minikube kernel:  [<ffffffff81143575>] out_of_memory+0x275/0x490
+        # Apr 20 16:45:31 minikube kernel:  [<ffffffff8119d819>] mem_cgroup_out_of_memory+0x39/0x50
+        # Apr 20 16:45:31 minikube kernel:  [<ffffffff811a29a0>] mem_cgroup_oom_synchronize+0x2d0/0x300
+        # Apr 20 16:45:31 minikube kernel:  [<ffffffff8119e800>] ? mem_cgroup_css_online+0x30/0x30
+        # Apr 20 16:45:31 minikube kernel:  [<ffffffff811437b4>] pagefault_out_of_memory+0x24/0x60
+        # Apr 20 16:45:31 minikube kernel:  [<ffffffff8104d63d>] mm_fault_error+0x6d/0x140
+        # Apr 20 16:45:31 minikube kernel:  [<ffffffff8104dbad>] __do_page_fault+0x49d/0x4b0
+        # Apr 20 16:45:31 minikube kernel:  [<ffffffff8104dbe2>] do_page_fault+0x22/0x30
+        # Apr 20 16:45:31 minikube kernel:  [<ffffffff819e7648>] page_fault+0x28/0x30
+        # Apr 20 16:45:31 minikube kernel: Task in /kubepods/burstable/pod31235f79-44b9-11e8-b805-08002792e991/8d89ea00437d020be5bcfca6500f76da8c54a862517cee4aae75e5d13c95448a killed as a result of limit of /kubepods/burstable/pod31235f79-44b9-11e8-b805-08002792e991/8d89ea00437d020be5bcfca6500f76da8c54a862517cee4aae75e5d13c95448a
+        # Apr 20 16:45:31 minikube kernel: memory: usage 261568kB, limit 262144kB, failcnt 0
+        # Apr 20 16:45:31 minikube kernel: memory+swap: usage 262144kB, limit 262144kB, failcnt 33
+        # Apr 20 16:45:31 minikube kernel: kmem: usage 2036kB, limit 9007199254740988kB, failcnt 0
+        # Apr 20 16:45:31 minikube kernel: Memory cgroup stats for /kubepods/burstable/pod31235f79-44b9-11e8-b805-08002792e991/8d89ea00437d020be5bcfca6500f76da8c54a862517cee4aae75e5d13c95448a: cache:28KB rss:259504KB rss_huge:0KB mapped_file:4KB dirty:0KB writeback:16KB swap:576KB inactive_anon:52612KB active_anon:206636KB inactive_file:0KB active_file:0KB unevictable:0KB
+        # Apr 20 16:45:31 minikube kernel: [ pid ]   uid  tgid total_vm      rss nr_ptes nr_pmds swapents oom_score_adj name
+        # Apr 20 16:45:31 minikube kernel: [16727]     0 16727      378        0       6       3       15           984 sh
+        # Apr 20 16:45:31 minikube kernel: [16764]     0 16764   429639    66683     181       6      325           984 java
+        # Apr 20 16:45:31 minikube kernel: Memory cgroup out of memory: Kill process 16764 (java) score 2001 or sacrifice child
+        # Apr 20 16:45:31 minikube kernel: Killed process 16764 (java) total-vm:1718556kB, anon-rss:257168kB, file-rss:9564kB, shmem-rss:0kB
+        # Apr 20 16:45:31 minikube kernel: oom_reaper: reaped process 16764 (java), now anon-rss:0kB, file-rss:0kB, shmem-rss:0kB
+        # Apr 20 16:45:31 minikube dockerd[2538]: time="2018-04-20T16:45:31Z" level=info msg="shim reaped" id=8d89ea00437d020be5bcfca6500f76da8c54a862517cee4aae75e5d13c95448a module="containerd/tasks"
+        # Apr 20 16:45:31 minikube dockerd[2538]: time="2018-04-20T16:45:31.233530539Z" level=info msg="ignoring event" module=libcontainerd namespace=moby topic=/tasks/delete type="*events.TaskDelete"
+        #
+        #
+        # Benchs:
+        #     JAVA_OPTS="-Xms64m -Xmx128m",memory:128Mi/256Mi,cpu:500m/1==>Killed
+        #     JAVA_OPTS="-Xms64m -Xmx128m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap",memory:96Mi/192Mi,cpu:500m/1==>Killed
+        #     JAVA_OPTS="-Xms64m -Xmx128m",memory:192Mi/384Mi,cpu:500m/1==>Started Application in 44.019 seconds (JVM running for 45.779)
+        #     JAVA_OPTS="-Xms64m -Xmx128m",memory:256Mi/512Mi,cpu:50m/100m==>Started Application in 551.896 seconds (JVM running for 577.657)
+        #     JAVA_OPTS="-Xms64m -Xmx128m",memory:256Mi/512Mi,cpu:125m/250m==>Started Application in 197.397 seconds (JVM running for 207.037)
+        #     JAVA_OPTS="-Xms64m -Xmx128m",memory:256Mi/512Mi,cpu:250m/500m==>Started Application in 94.802 seconds (JVM running for 99.119)
+        #     JAVA_OPTS="-Xms64m -Xmx128m",memory:256Mi/512Mi,cpu:500m/1==>Started Application in 46.817 seconds (JVM running for 49.077)
+
+        # Script de test: Récupération d'une ville au hasard
+        #
+        # while (true); do time curl -v GET --header 'Accept: application/json' http://192.168.99.100:30745/villes/$(( ( RANDOM % 4 )  + 1 )); sleep 1; done
+        # ==> Réponse: 1 par seconde, pas de pb
+        #
+        # while (true); do time curl -v GET --header 'Accept: application/json' http://192.168.99.100:30745/villes/$(( ( RANDOM % 4 )  + 1 )); sleep .1; done
+        # ==> Réponse: 3 à 4 réponse en moyenne par seconde, pas de pb
+        # Benchs
+        #     JAVA_OPTS="-Xms64m -Xmx128m",memory:256Mi/512Mi,cpu:50m/100m==>Started Application in 551.896 seconds (JVM running for 577.657)
+        resources:
+          requests:
+            memory: "192Mi"
+            cpu: "500m"
+          limits:
+            memory: "384Mi"
+            cpu: "1"
+        # - containerPort: 9010
+        #   name: jmx
+        env:
+        - name: JAVA_OPTS
+        #   # value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.net.preferIPv4Stack=true
+        #   value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
+          # value: -Xms64m -Xmx128m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxMetaspaceSize=64m
+          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxMetaspaceSize=64m
+
+# Monitoring memoire jvm
+# cyrille@cyrille-XPS-15-9560:~$ kubectl -n app-cluster exec -ti resanet-tp-00-78f44b548d-9f5df -- ps -eaf
+# PID   USER     TIME   COMMAND
+#     1 root       0:00 sh -c java $JAVA_OPTS -jar /app/resanet.jar
+#     7 root       0:44 java -Xms64m -Xmx128m -XX:+UnlockExperimentalVMOptions -X
+#    70 root       0:00 ps -eaf
+# cyrille@cyrille-XPS-15-9560:~$ kubectl -n app-cluster exec -ti resanet-tp-00-78f44b548d-9f5df -- jstat -gc 7 10s
+#  S0C    S1C    S0U    S1U      EC       EU        OC         OU       MC     MU    CCSC   CCSU   YGC     YGCT    FGC    FGCT     GCT   
+# 2048.0 2560.0  0.0    0.0   38400.0   6752.0   82944.0    34488.5   59028.0 58218.0 7356.0 7174.5     85    2.078   3      1.995    4.072
+# 2048.0 2560.0  0.0    0.0   38400.0  26540.0   82944.0    34488.5   59028.0 58218.0 7356.0 7174.5     85    2.078   3      1.995    4.072
+# 2048.0 2048.0 608.0   0.0   38912.0   8775.4   82944.0    34496.5   60436.0 59412.2 7484.0 7208.9     86    2.082   3      1.995    4.076
+# 2048.0 2048.0 608.0   0.0   38912.0  27575.5   82944.0    34496.5   60436.0 59412.2 7484.0 7208.9     86    2.082   3      1.995    4.076
+# 2048.0 2048.0  0.0   608.0  38912.0   7940.5   82944.0    34504.5   60948.0 59987.0 7484.0 7208.9     87    2.087   3      1.995    4.081
+# 2048.0 2048.0  0.0   608.0  38912.0  26837.2   82944.0    34504.5   60948.0 59987.0 7484.0 7208.9     87    2.087   3      1.995    4.081
+# 2048.0 2048.0 544.0   0.0   39424.0   7928.9   82944.0    34512.5   61716.0 60647.0 7484.0 7210.3     88    2.091   3      1.995    4.085
+# 2048.0 2048.0 544.0   0.0   39424.0  26565.8   82944.0    34512.5   61716.0 60647.0 7484.0 7210.3     88    2.091   3      1.995    4.085
+
+
+# Passage de
+# memory:192Mi/384Mi
+# JAVA_OPTS: -Xms64m -Xmx128m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxMetaspaceSize=64m
+# à 
+# memory:192Mi/384Mi
+# JAVA_OPTS: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxMetaspaceSize=64m
+#
+# memory:192Mi/384Mi
+# JAVA_OPTS: -Xms64m -Xmx128m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxMetaspaceSize=64m
+# kubectl -n app-cluster exec -ti resanet-tp-00-78f44b548d-8g57g -- jstat -gc 7 10s
+#  S0C    S1C    S0U    S1U      EC       EU        OC         OU       MC     MU    CCSC   CCSU   YGC     YGCT    FGC    FGCT     GCT   
+# 2048.0 2048.0  0.0    0.0   39424.0  29891.2   69632.0    34523.5   59028.0 58181.8 7356.0 7180.0     81    1.726   3      1.909    3.635
+#
+# memory:192Mi/384Mi
+# JAVA_OPTS: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxMetaspaceSize=64m
+# cyrille@cyrille-XPS-15-9560:~/Documents/kubernetes/app-cluster$ (master) kubectl -n app-cluster exec -ti resanet-tp-00-68877c8b58-fwpkp -- jstat -gc 6 10s
+#  S0C    S1C    S0U    S1U      EC       EU        OC         OU       MC     MU    CCSC   CCSU   YGC     YGCT    FGC    FGCT     GCT   
+# 4096.0 4096.0  0.0   3039.6 34304.0  11360.2   45056.0    36655.1   59392.0 58445.4 7424.0 7211.2     99    2.674   5      3.984    6.659
+#
+#
+
+# Passage à
+# memory:128Mi/256Mi
+# JAVA_OPTS: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxMetaspaceSize=64m
+# ==> Killed
+
+# Passage à
+# memory:150Mi/300Mi
+# JAVA_OPTS: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxMetaspaceSize=64m
+# kubectl -n app-cluster exec -ti resanet-tp-00-858987d5ff-mmkqc -- jstat -gc 7 10s
+#  S0C    S1C    S0U    S1U      EC       EU        OC         OU       MC     MU    CCSC   CCSU   YGC     YGCT    FGC    FGCT     GCT   
+# 6656.0 7168.0 1963.0  0.0   27648.0  14149.2   44544.0    34064.4   58240.0 57179.1 7296.0 7055.6    106    2.598   5      2.901    5.499
+# ==> Mais régulièrement des OOM kubernetes, le process se fait shooter par docker avec environ 100requetes/s
+
+# $ minikube ssh
+# $ sudo journalctl -xef | grep "sacrifice"    
+# Apr 29 21:32:07 minikube kernel: Memory cgroup out of memory: Kill process 30110 (java) score 1198 or sacrifice child
+# Apr 29 21:33:17 minikube kernel: Memory cgroup out of memory: Kill process 17268 (java) score 1976 or sacrifice child
+# Apr 29 21:34:28 minikube kernel: Memory cgroup out of memory: Kill process 18058 (java) score 1976 or sacrifice child
+# Apr 29 21:35:55 minikube kernel: Memory cgroup out of memory: Kill process 18877 (java) score 1967 or sacrifice child
+# Apr 29 21:46:47 minikube kernel: Memory cgroup out of memory: Kill process 19944 (java) score 1204 or sacrifice child
+# Apr 29 21:47:58 minikube kernel: Memory cgroup out of memory: Kill process 24988 (java) score 1921 or sacrifice child
+# Apr 29 21:49:39 minikube kernel: Memory cgroup out of memory: Kill process 26077 (java) score 1211 or sacrifice child
