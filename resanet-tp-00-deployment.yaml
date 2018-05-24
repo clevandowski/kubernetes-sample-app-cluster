@@ -15,7 +15,10 @@ spec:
         tier: mysql
     spec:
       containers:
-      - image: clevandowski/resanet-tp-00
+      # - image: clevandowski/resanet-tp-00
+      # - image: clevandowski/resanet-tp-00:java9
+      - image: clevandowski/resanet-tp-00:java10
+      # - image: clevandowski/resanet-tp-00:java10-sql-debug
         imagePullPolicy: Always
         name: resanet-tp-00
         ports:
@@ -78,10 +81,10 @@ spec:
         #     JAVA_OPTS="-Xms64m -Xmx128m",memory:256Mi/512Mi,cpu:50m/100m==>Started Application in 551.896 seconds (JVM running for 577.657)
         resources:
           requests:
-            memory: "192Mi"
+            memory: "512Mi"
             cpu: "500m"
           limits:
-            memory: "384Mi"
+            memory: "1Gi"
             cpu: "1"
         # - containerPort: 9010
         #   name: jmx
@@ -90,7 +93,13 @@ spec:
         #   # value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false -Djava.net.preferIPv4Stack=true
         #   value: -Dcom.sun.management.jmxremote -Dcom.sun.management.jmxremote.port=9010 -Dcom.sun.management.jmxremote.local.only=false -Dcom.sun.management.jmxremote.authenticate=false -Dcom.sun.management.jmxremote.ssl=false
           # value: -Xms64m -Xmx128m -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxMetaspaceSize=64m
-          value: -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:MaxMetaspaceSize=64m
+
+          # jdk8+G1GC
+          # value: -XX:+UseG1GC -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+ExitOnOutOfMemoryError -XX:+PrintCommandLineFlags -XX:+PrintFlagsFinal -XX:+UnlockDiagnosticVMOptions
+          # jdk9+G1GC
+          # value: --add-modules java.xml.bind -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -XX:+PrintCommandLineFlags -XX:+PrintFlagsFinal -XX:+UnlockDiagnosticVMOptions -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
+          # jdk10+G1GC
+          value: --add-modules java.xml.bind -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -XX:+PrintCommandLineFlags -XX:+PrintFlagsFinal -XX:+UnlockDiagnosticVMOptions
 
 # Monitoring memoire jvm
 # cyrille@cyrille-XPS-15-9560:~$ kubectl -n app-cluster exec -ti resanet-tp-00-78f44b548d-9f5df -- ps -eaf
@@ -143,6 +152,58 @@ spec:
 #  S0C    S1C    S0U    S1U      EC       EU        OC         OU       MC     MU    CCSC   CCSU   YGC     YGCT    FGC    FGCT     GCT   
 # 6656.0 7168.0 1963.0  0.0   27648.0  14149.2   44544.0    34064.4   58240.0 57179.1 7296.0 7055.6    106    2.598   5      2.901    5.499
 # ==> Mais régulièrement des OOM kubernetes, le process se fait shooter par docker avec environ 100requetes/s
+# ==> En repassant en 192Mi/384Mi, la situation se rétablit
+
+
+# jdk8/G1GC
+# * Arguments de la ligne de commande:
+# -XX:+ExitOnOutOfMemoryError -XX:InitialHeapSize=16777216 -XX:MaxHeapSize=268435456 -XX:+PrintCommandLineFlags -XX:+PrintFlagsFinal -XX:+UnlockDiagnosticVMOptions -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+UseCompressedClassPointers -XX:+UseCompressedOops -XX:+UseG1GC 
+# * Temps de démarrage
+# 2018-05-17 20:39:59 INFO  c.z.m.r.s.Application:57 - Started Application in 45.681 seconds (JVM running for 47.74)
+# 2018-05-17 20:46:46 INFO  c.z.m.r.s.Application:57 - Started Application in 47.828 seconds (JVM running for 49.955)
+# 2018-05-17 20:45:10 INFO  c.z.m.r.s.Application:57 - Started Application in 50.282 seconds (JVM running for 52.736)
+# * Conf container
+# resources:
+#   requests:
+#     memory: "512Mi"
+#     cpu: "500m"
+#   limits:
+#     memory: "1Gi"
+#     cpu: "1"
+
+# jdk9
+# * Arguments de la ligne de commande:
+# -XX:+ExitOnOutOfMemoryError -XX:G1ConcRefinementThreads=4 -XX:InitialHeapSize=16777216 -XX:MaxHeapSize=268435456 -XX:+PrintCommandLineFlags -XX:+PrintFlagsFinal -XX:ReservedCodeCacheSize=251658240 -XX:+SegmentedCodeCache -XX:+UnlockDiagnosticVMOptions -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap -XX:+UseCompressedClassPointers -XX:+UseCompressedOops -XX:+UseG1GC 
+# * Temps de démarrage
+# 2018-05-17 20:32:34 INFO  c.z.m.r.s.Application:57 - Started Application in 40.205 seconds (JVM running for 42.245)
+# 2018-05-17 20:50:48 INFO  c.z.m.r.s.Application:57 - Started Application in 40.812 seconds (JVM running for 43.624)
+# 2018-05-17 20:48:54 INFO  c.z.m.r.s.Application:57 - Started Application in 41.307 seconds (JVM running for 43.724)
+# * Conf container
+# resources:
+#   requests:
+#     memory: "512Mi"
+#     cpu: "500m"
+#   limits:
+#     memory: "1Gi"
+#     cpu: "1"
+
+# jdk10
+# * Arguments de la ligne de commande:
+# -XX:+ExitOnOutOfMemoryError -XX:G1ConcRefinementThreads=1 -XX:InitialHeapSize=16777216 -XX:MaxHeapSize=268435456 -XX:+PrintCommandLineFlags -XX:+PrintFlagsFinal -XX:ReservedCodeCacheSize=251658240 -XX:+SegmentedCodeCache -XX:+UnlockDiagnosticVMOptions -XX:+UseCompressedClassPointers -XX:+UseCompressedOops -XX:+UseG1GC 
+# * Temps de démarrage
+# 2018-05-17 19:57:48 INFO  c.z.m.r.s.Application:57 - Started Application in 20.197 seconds (JVM running for 21.98)
+# 2018-05-17 20:54:45 INFO  c.z.m.r.s.Application:57 - Started Application in 21.503 seconds (JVM running for 23.298)
+# 2018-05-17 20:56:02 INFO  c.z.m.r.s.Application:57 - Started Application in 22.323 seconds (JVM running for 24.28)
+# * Conf container
+# resources:
+#   requests:
+#     memory: "512Mi"
+#     cpu: "500m"
+#   limits:
+#     memory: "1Gi"
+#     cpu: "1"
+
+
 
 # $ minikube ssh
 # $ sudo journalctl -xef | grep "sacrifice"    
@@ -153,3 +214,41 @@ spec:
 # Apr 29 21:46:47 minikube kernel: Memory cgroup out of memory: Kill process 19944 (java) score 1204 or sacrifice child
 # Apr 29 21:47:58 minikube kernel: Memory cgroup out of memory: Kill process 24988 (java) score 1921 or sacrifice child
 # Apr 29 21:49:39 minikube kernel: Memory cgroup out of memory: Kill process 26077 (java) score 1211 or sacrifice child
+
+
+# JDK10
+
+# $ echo 'Runtime.getRuntime().availableProcessors()' | docker run --cpus 2 -i openjdk:9
+# May 09, 2018 10:29:53 PM java.util.prefs.FileSystemPreferences$1 run
+# INFO: Created user preferences directory.
+# |  Welcome to JShell -- Version 9.0.4
+# |  For an introduction type: /help intro
+
+# jshell> Runtime.getRuntime().availableProcessors()
+# $1 ==> 8
+
+# $ echo 'Runtime.getRuntime().availableProcessors()' | docker run --cpus 2 -i openjdk:10
+# May 09, 2018 10:30:05 PM java.util.prefs.FileSystemPreferences$1 run
+# INFO: Created user preferences directory.
+# |  Welcome to JShell -- Version 10.0.1
+# |  For an introduction type: /help intro
+
+# jshell> Runtime.getRuntime().availableProcessors()
+# $1 ==> 2
+
+# $ docker run -ti  openjdk:9 java -XX:+PrintFlagsFinal -version | grep -i GCThreads
+#      uint ConcGCThreads                            = 2                                        {product} {ergonomic}
+#      uint ParallelGCThreads                        = 8                                        {product} {default}
+#      bool UseDynamicNumberOfGCThreads              = false                                    {product} {default}
+# $ docker run -ti  openjdk:10 java -XX:+PrintFlagsFinal -version | grep -i GCThreads
+#      uint ConcGCThreads                            = 2                                        {product} {ergonomic}
+#      uint ParallelGCThreads                        = 8                                        {product} {default}
+#      bool UseDynamicNumberOfGCThreads              = false                                    {product} {default}
+# $ docker run -ti --cpus 2 openjdk:9 java -XX:+PrintFlagsFinal -version | grep -i GCThreads
+#      uint ConcGCThreads                            = 2                                        {product} {ergonomic}
+#      uint ParallelGCThreads                        = 8                                        {product} {default}
+#      bool UseDynamicNumberOfGCThreads              = false                                    {product} {default}
+# $ docker run -ti --cpus 2 openjdk:10 java -XX:+PrintFlagsFinal -version | grep -i GCThreads
+#      uint ConcGCThreads                            = 1                                        {product} {ergonomic}
+#      uint ParallelGCThreads                        = 2                                        {product} {default}
+#      bool UseDynamicNumberOfGCThreads              = false                                    {product} {default}
