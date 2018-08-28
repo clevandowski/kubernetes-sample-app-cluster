@@ -1,4 +1,50 @@
 apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: mysql
+  # namespace: tooling
+  labels:
+    app: mysql
+
+---
+
+kind: ClusterRole
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  name: mysql
+  labels:
+    app: mysql
+rules:
+- apiGroups:
+  - ""
+  resources:
+  - "services"
+  - "namespaces"
+  - "endpoints"
+  verbs:
+  - "get"
+
+---
+
+kind: ClusterRoleBinding
+apiVersion: rbac.authorization.k8s.io/v1beta1
+metadata:
+  namespace: app-cluster
+  name: mysql
+  labels:
+    app: mysql
+subjects:
+- kind: ServiceAccount
+  name: mysql
+  namespace: app-cluster
+  apiGroup: ""
+roleRef:
+  kind: ClusterRole
+  name: mysql
+  apiGroup: ""
+
+---
+apiVersion: v1
 kind: Service
 metadata:
   name: mysql
@@ -10,39 +56,46 @@ spec:
   selector:
     app: mysql
     tier: mysql
-  clusterIP: None
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: mysql-pv-claim
+#   labels:
+#     app: mysql
+# spec:
+#   accessModes:
+#     - ReadWriteOnce
+#   resources:
+#     requests:
+#       storage: 2Gi
 ---
-apiVersion: v1
-kind: PersistentVolumeClaim
-metadata:
-  name: mysql-pv-claim
-  labels:
-    app: mysql
-spec:
-  accessModes:
-    - ReadWriteOnce
-  resources:
-    requests:
-      storage: 2Gi
----
-apiVersion: extensions/v1beta1
-kind: Deployment
+apiVersion: apps/v1beta1
+kind: StatefulSet
+# apiVersion: extensions/v1beta1
+# kind: Deployment
 metadata:
   name: mysql
   labels:
     app: mysql
 spec:
-  strategy:
-    type: Recreate
+  serviceName: mysql
   template:
     metadata:
       labels:
         app: mysql
         tier: mysql
     spec:
+      serviceAccountName: mysql
+      securityContext:
+        runAsUser: 999
+        fsGroup: 999
       containers:
       - image: mysql:5.7
         name: mysql
+        # command: ["ls"]
+        # args: ["-l", "/var/lib/mysql"]
+        args: ["--ignore-db-dir", "lost+found"]
         env:
           # $ kubectl create secret generic mysql-pass --from-file=password.txt
           # make sure password.txt does not have a trailing newline
@@ -57,7 +110,19 @@ spec:
         volumeMounts:
         - name: mysql-persistent-storage
           mountPath: /var/lib/mysql
-      volumes:
-      - name: mysql-persistent-storage
-        persistentVolumeClaim:
-          claimName: mysql-pv-claim
+      # volumes:
+      # - name: mysql-persistent-storage
+      #   persistentVolumeClaim:
+      #     claimName: mysql-pv-claim
+      nodeSelector:
+         kops.k8s.io/instancegroup: preprod
+  volumeClaimTemplates:
+  - metadata:
+      name: mysql-persistent-storage
+      annotations:
+        volume.beta.kubernetes.io/storage-class: "default"
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: 2Gi

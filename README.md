@@ -242,7 +242,8 @@ mysql -h"mysql" -P"3306" -uroot -p"coincoin"
 mysql -h"192.168.99.100" -P"32735" -uroot -p"coincoin"
 http://192.168.99.100:32735/
 
-
+Sous kops:
+kubectl -n app-cluster run -it --image mysql mysql-client -- sh -c 'exec mysql -h"mysql" -P"3306" -uroot -pcoincoin'
 
 
 ### Conf ELK

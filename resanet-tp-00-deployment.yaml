@@ -1,3 +1,25 @@
+---
+apiVersion: v1
+kind: Service
+metadata:
+  # labels for the service
+  labels:
+    app: resanet-tp-00
+  # name of the service
+  name: resanet-tp-00
+spec:
+  type: LoadBalancer
+  ports:
+    # the port that this service should serve on
+    - port: 8000
+      # set the target of the port, in this case 81 -> 80
+      targetPort: 8000
+      #nodePort: 30568
+  # label keys and values that must match in order to receive traffic for this service
+  selector:
+    # select pods with the name "phpmyadmin"
+    app: resanet-tp-00
+---
 apiVersion: extensions/v1beta1
 kind: Deployment
 metadata:
@@ -99,7 +121,8 @@ spec:
           # jdk9+G1GC
           # value: --add-modules java.xml.bind -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -XX:+PrintCommandLineFlags -XX:+PrintFlagsFinal -XX:+UnlockDiagnosticVMOptions -XX:+UnlockExperimentalVMOptions -XX:+UseCGroupMemoryLimitForHeap
           # jdk10+G1GC
-          value: --add-modules java.xml.bind -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -XX:+PrintCommandLineFlags -XX:+PrintFlagsFinal -XX:+UnlockDiagnosticVMOptions
+          # value: --add-modules java.xml.bind -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -XX:+PrintCommandLineFlags -XX:+PrintFlagsFinal -XX:+UnlockDiagnosticVMOptions
+          value: -XX:+UseG1GC -XX:+ExitOnOutOfMemoryError -XX:+PrintCommandLineFlags -XX:+PrintFlagsFinal -XX:+UnlockDiagnosticVMOptions
 
 # Monitoring memoire jvm
 # cyrille@cyrille-XPS-15-9560:~$ kubectl -n app-cluster exec -ti resanet-tp-00-78f44b548d-9f5df -- ps -eaf
