@@ -114,8 +114,8 @@ spec:
       # - name: mysql-persistent-storage
       #   persistentVolumeClaim:
       #     claimName: mysql-pv-claim
-      nodeSelector:
-         kops.k8s.io/instancegroup: preprod
+      # nodeSelector:
+      #    kops.k8s.io/instancegroup: preprod
   volumeClaimTemplates:
   - metadata:
       name: mysql-persistent-storage

@@ -28,6 +28,7 @@ metadata:
     app: resanet-tp-00
     date: 2018-04-29_22-05
 spec:
+  replicas: 5
   strategy:
     type: Recreate
   template:

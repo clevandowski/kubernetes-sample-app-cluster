@@ -9,7 +9,7 @@
     <logger name="com.zenika.microservices.resanet" additivity="false" level="TRACE">
         <appender-ref ref="stdout"/>
     </logger>
-    <logger name="org.hibernate" additivity="false" level="DEBUG">
+    <logger name="org.hibernate" additivity="false" level="INFO">
         <appender-ref ref="stdout"/>
     </logger>
     <root level="INFO">

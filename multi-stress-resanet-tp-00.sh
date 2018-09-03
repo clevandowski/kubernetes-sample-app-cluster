@@ -2,22 +2,27 @@
 
 NB_THREADS=10
 TIMEOUT=10
+RESANET_SERVICE_ENDPOINT=http://192.168.99.100:30745
 
 usage() {
   echo "Usage $0:"
   echo "\t-n NB_THREADS (défaut 10)"
   echo "\t-t TIMEOUT en seconde (défaut 10s)"
+  echo "\t-s Adresse du service resanet (ex: http://a4e4245f3ab1311e8a1890e5ce83fc93-1143218904.eu-west-3.elb.amazonaws.com:8000)"
 }
 
 process_params() {
 
-  while getopts "n:t:" option; do
+  while getopts "n:t:s:" option; do
     case $option in
       n)
         NB_THREADS=$OPTARG
         ;;
       t)
         TIMEOUT=$OPTARG
+        ;;
+      s)
+        RESANET_SERVICE_ENDPOINT=$OPTARG
         ;;
       h)
         usage
@@ -61,7 +66,7 @@ i=0
 echo "NB_THREADS=$NB_THREADS"
 echo "TIMEOUT=$TIMEOUT"
 while [ $i -lt $NB_THREADS ]; do
-  timeout "$TIMEOUT"s ./stress-resanet-tp-00.sh &
+  timeout "$TIMEOUT"s ./stress-resanet-tp-00.sh $RESANET_SERVICE_ENDPOINT &
   i=$((i+1))
 done
 wait
