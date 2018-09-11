@@ -1,0 +1,13 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: mysql-create-database
+spec:
+  template:
+    spec:
+      containers:
+      - name: mysql-create-database
+        image: mysql
+        command: ["/usr/bin/mysql", "-hmysql", "-P3306", "-uroot", "-pcoincoin", "-e", "create database if not exists resanet character set utf8"]
+      restartPolicy: Never
+  backoffLimit: 4
